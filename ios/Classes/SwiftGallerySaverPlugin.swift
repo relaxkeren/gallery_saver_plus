@@ -83,12 +83,22 @@ public class SwiftGallerySaverPlugin: NSObject, FlutterPlugin {
                           _ flutterResult: @escaping FlutterResult) {
         let url = URL(fileURLWithPath: filePath)
         PHPhotoLibrary.shared().performChanges({
-            let assetCreationRequest = mediaType == .image ?
-                PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: url)
-                : PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url);
+            let assetCreationRequest: PHAssetCreationRequest = PHAssetCreationRequest.forAsset()
+            if mediaType == .image {
+                // let assetCreationRequest = PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: url)                
+                guard let imageData = try? Data(contentsOf: url) else {
+                    flutterResult(false)
+                    return
+                }
+            } else {
+                // let assetCreationRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+                let resourceOptions = PHAssetResourceCreationOptions()
+                resourceOptions.shouldMoveFile = false
+                assetCreationRequest.addResource(with: .video, fileURL: url, options: resourceOptions)
+            }
             if (album != nil) {
                 guard let assetCollectionChangeRequest = PHAssetCollectionChangeRequest(for: album!),
-                    let createdAssetPlaceholder = assetCreationRequest?.placeholderForCreatedAsset else {
+                    let createdAssetPlaceholder = assetCreationRequest.placeholderForCreatedAsset else {
                             return
                     }
                 assetCollectionChangeRequest.addAssets(NSArray(array: [createdAssetPlaceholder]))
