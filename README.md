@@ -99,10 +99,16 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           firstButtonText = 'saving in progress...';
         });
-        GallerySaver.saveImage(recordedImage.path).then((String path) {
-          setState(() {
-            firstButtonText = 'image saved!';
-          });
+        GallerySaver.saveImage(recordedImage.path).then((String result) {
+          if (result.isEmpty) {
+            setState(() {
+              firstButtonText = 'image saved!';
+            });
+          } else {
+            setState(() {
+              firstButtonText = 'error: ' + result;
+            });
+          }
         });
       }
     });
@@ -115,10 +121,16 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           secondButtonText = 'saving in progress...';
         });
-        GallerySaver.saveVideo(recordedVideo.path).then((String path) {
-          setState(() {
-            secondButtonText = 'video saved!';
-          });
+        GallerySaver.saveVideo(recordedVideo.path).then((String result) {
+          if (result.isEmpty) {
+            setState(() {
+              secondButtonText = 'video saved!';
+            });
+          } else {
+            setState(() {
+              secondButtonText = 'error: ' + result;
+            });
+          }
         });
       }
     });
@@ -126,20 +138,32 @@ class _MyAppState extends State<MyApp> {
   void _saveNetworkVideo() async {
     String path =
         'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4';
-    GallerySaver.saveVideo(path).then((bool success) {
-      setState(() {
-        print('Video is saved');
-      });
+    GallerySaver.saveVideo(path).then((String result) {
+      if (result.isEmpty) {
+        setState(() {
+          print('Video is saved');
+        });
+      } else {
+        setState(() {
+          print('Error saving video: ' + result);
+        });
+      }
     });
   }
 
   void _saveNetworkImage() async {
     String path =
         'https://image.shutterstock.com/image-photo/montreal-canada-july-11-2019-600w-1450023539.jpg';
-    GallerySaver.saveImage(path).then((bool success) {
-      setState(() {
-        print('Image is saved');
-      });
+    GallerySaver.saveImage(path).then((String result) {
+      if (result.isEmpty) {
+        setState(() {
+          print('Image is saved');
+        });
+      } else {
+        setState(() {
+          print('Error saving image: ' + result);
+        });
+      }
     });
   }
 }

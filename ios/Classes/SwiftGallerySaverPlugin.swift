@@ -34,7 +34,7 @@ public class SwiftGallerySaverPlugin: NSObject, FlutterPlugin {
     /// - Parameters:
     ///   - call: method object with params for saving media
     ///   - mediaType: media type
-    ///   - result: flutter result that gets sent back to the dart code
+    ///   - result: flutter result that gets sent back to the dart code (now returns String instead of Bool)
     ///
     func saveMedia(_ call: FlutterMethodCall, _ mediaType: MediaType, _ result: @escaping FlutterResult) {
         let args = call.arguments as? Dictionary<String, Any>
@@ -47,13 +47,13 @@ public class SwiftGallerySaverPlugin: NSObject, FlutterPlugin {
                 if status == .authorized{
                     self._saveMediaToAlbum(path, mediaType, albumName, result)
                 } else {
-                    result(false);
+                    result("Photo library access denied")
                 }
             })
         } else if status == .authorized {
             self._saveMediaToAlbum(path, mediaType, albumName, result)
         } else {
-            result(false);
+            result("Photo library access not authorized")
         }
     }
     
@@ -67,13 +67,13 @@ public class SwiftGallerySaverPlugin: NSObject, FlutterPlugin {
             // create photos album
             createAppPhotosAlbum(albumName: albumName!) { (error) in
                 guard error == nil else {
-                    flutterResult(false)
+                    flutterResult("Failed to create album: \(error?.localizedDescription ?? "Unknown error")")
                     return
-                    }
+                }
                 if let album = self.fetchAssetCollectionForAlbum(albumName!){
                     self.saveFile(imagePath, mediaType, album, flutterResult)
                 } else {
-                    flutterResult(false)
+                    flutterResult("Failed to find created album")
                 }
             }
         }
@@ -85,7 +85,7 @@ public class SwiftGallerySaverPlugin: NSObject, FlutterPlugin {
 
         guard FileManager.default.fileExists(atPath: filePath) else {
             print("File does not exist at path: \(filePath)")
-            flutterResult(false)
+            flutterResult("File does not exist at path: \(filePath)")
             return
         }
 
@@ -97,10 +97,9 @@ public class SwiftGallerySaverPlugin: NSObject, FlutterPlugin {
                     assetCreationRequest.addResource(with: .photo, data: imageData, options: nil)
                 } catch {
                     print("Failed to load image data: \(error)")
-                    // Don't return here - let the performChanges complete and handle error in callback
+                    // We'll handle this error in the performChanges callback
                 }
             } else {
-                // let assetCreationRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
                 let resourceOptions = PHAssetResourceCreationOptions()
                 resourceOptions.shouldMoveFile = false
                 assetCreationRequest.addResource(with: .video, fileURL: url, options: resourceOptions)
@@ -114,9 +113,10 @@ public class SwiftGallerySaverPlugin: NSObject, FlutterPlugin {
             }
         }) { (success, error) in
             if success {
-                flutterResult(true)
+                flutterResult("") // Empty string indicates success
             } else {
-                flutterResult(false)
+                let errorMessage = error?.localizedDescription ?? "Unknown error occurred while saving media"
+                flutterResult(errorMessage)
             }
         }
     }
@@ -142,4 +142,3 @@ public class SwiftGallerySaverPlugin: NSObject, FlutterPlugin {
         }
     }
 }
-

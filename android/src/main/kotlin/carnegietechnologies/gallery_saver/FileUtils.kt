@@ -42,7 +42,7 @@ internal object FileUtils {
         path: String,
         folderName: String?,
         toDcim: Boolean
-    ): Boolean {
+    ): String {
         val file = File(path)
         val extension = MimeTypeMap.getFileExtensionFromUrl(file.toString())
         val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
@@ -106,12 +106,12 @@ internal object FileUtils {
             }
         } catch (e: IOException) {
             contentResolver.delete(imageUri!!, null, null)
-            return false
+            return e.message ?: "IOException occurred while saving image"
         } catch (t: Throwable) {
-            return false
+            return t.message ?: "Unknown error occurred while saving image"
         }
 
-        return true
+        return ""
     }
 
     /**
@@ -254,7 +254,7 @@ internal object FileUtils {
         folderName: String?,
         toDcim: Boolean,
         bufferSize: Int = BUFFER_SIZE
-    ): Boolean {
+    ): String {
         val inputFile = File(inputPath)
         val inputStream: InputStream?
         val outputStream: OutputStream?
@@ -309,12 +309,12 @@ internal object FileUtils {
             }
         } catch (fnfE: FileNotFoundException) {
             Log.e("GallerySaver", fnfE.message ?: fnfE.toString())
-            return false
+            return fnfE.message ?: "FileNotFoundException occurred while saving video"
         } catch (e: Exception) {
             Log.e("GallerySaver", e.message ?: e.toString())
-            return false
+            return e.message ?: "Exception occurred while saving video"
         }
-        return true
+        return ""
     }
 
     private fun getAlbumFolderPath(

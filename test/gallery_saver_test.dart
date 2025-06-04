@@ -12,9 +12,9 @@ void main() {
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
       switch (methodCall.method) {
         case 'saveImage':
-          return true;
+          return '';
         case 'saveVideo':
-          return false;
+          return 'error';
       }
       return 'unknown method';
     });
@@ -25,10 +25,10 @@ void main() {
   });
 
   test('save image', () async {
-    expect(await GallerySaver.saveImage('/storage/emulated/image.jpg'), true);
+    expect(await GallerySaver.saveImage('/storage/emulated/image.jpg'), '');
   });
 
   test('save video', () async {
-    expect(await GallerySaver.saveVideo('/storage/emulated/video.mov'), false);
+    expect(await GallerySaver.saveVideo('/storage/emulated/video.mov'), 'error');
   });
 }

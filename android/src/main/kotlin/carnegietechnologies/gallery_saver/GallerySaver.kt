@@ -63,25 +63,19 @@ class GallerySaver internal constructor(private val activity: Activity) :
 
     private fun saveMediaFile() {
         uiScope.launch {
-            val success = async(Dispatchers.IO) {
+            val resultString = async(Dispatchers.IO) {
                 if (mediaType == MediaType.video) {
                     FileUtils.insertVideo(activity.contentResolver, filePath, albumName, toDcim)
                 } else {
                     FileUtils.insertImage(activity.contentResolver, filePath, albumName, toDcim)
                 }
-            }
-            success.await()
-            finishWithSuccess()
+            }.await()
+            finishWithResult(resultString)
         }
     }
 
-    private fun finishWithSuccess() {
-        pendingResult!!.success(true)
-        pendingResult = null
-    }
-
-    private fun finishWithFailure() {
-        pendingResult!!.success(false)
+    private fun finishWithResult(result: String) {
+        pendingResult!!.success(result)
         pendingResult = null
     }
 
@@ -94,7 +88,7 @@ class GallerySaver internal constructor(private val activity: Activity) :
             if (permissionGranted) {
                 saveMediaFile()
             } else {
-                finishWithFailure()
+                finishWithResult("Permission denied to write to external storage")
             }
             return true
         }
