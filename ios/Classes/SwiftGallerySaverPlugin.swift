@@ -92,13 +92,7 @@ public class SwiftGallerySaverPlugin: NSObject, FlutterPlugin {
         PHPhotoLibrary.shared().performChanges({
             let assetCreationRequest: PHAssetCreationRequest = PHAssetCreationRequest.forAsset()
             if mediaType == .image {
-                do {
-                    let imageData = try Data(contentsOf: url)
-                    assetCreationRequest.addResource(with: .photo, data: imageData, options: nil)
-                } catch {
-                    print("Failed to load image data: \(error)")
-                    // We'll handle this error in the performChanges callback
-                }
+                assetCreationRequest.addResource(with: .photo, fileURL: url, options: nil)
             } else {
                 let resourceOptions = PHAssetResourceCreationOptions()
                 resourceOptions.shouldMoveFile = false
