@@ -82,13 +82,22 @@ public class SwiftGallerySaverPlugin: NSObject, FlutterPlugin {
     private func saveFile(_ filePath: String, _ mediaType: MediaType, _ album: PHAssetCollection?,
                           _ flutterResult: @escaping FlutterResult) {
         let url = URL(fileURLWithPath: filePath)
+
+        guard FileManager.default.fileExists(atPath: filePath) else {
+            print("File does not exist at path: \(filePath)")
+            flutterResult(false)
+            return
+        }
+
         PHPhotoLibrary.shared().performChanges({
             let assetCreationRequest: PHAssetCreationRequest = PHAssetCreationRequest.forAsset()
             if mediaType == .image {
-                // let assetCreationRequest = PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: url)                
-                guard let imageData = try? Data(contentsOf: url) else {
-                    flutterResult(false)
-                    return
+                do {
+                    let imageData = try Data(contentsOf: url)
+                    assetCreationRequest.addResource(with: .photo, data: imageData, options: nil)
+                } catch {
+                    print("Failed to load image data: \(error)")
+                    // Don't return here - let the performChanges complete and handle error in callback
                 }
             } else {
                 // let assetCreationRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
